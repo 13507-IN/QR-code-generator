@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>QR Code Generator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="container">
+    <h1>Custom QR Code Generator</h1>
+
+    <section class="controls">
+      <label>Text / URL
+        <textarea id="text" placeholder="Enter text or URL">https://example.com</textarea>
+      </label>
+
+      <div class="row">
+        <label>Size: <span id="sizeVal">300</span>px
+          <input id="size" type="range" min="128" max="1024" value="300">
+        </label>
+        <label>Dots color
+          <input id="dotsColor" type="color" value="#000000">
+        </label>
+        <label>Background
+          <input id="bgColor" type="color" value="#ffffff">
+        </label>
+      </div>
+
+      <div class="row">
+        <label>Style
+          <select id="dotStyle">
+            <option value="square">square</option>
+            <option value="rounded" selected>rounded</option>
+            <option value="dots">dots</option>
+            <option value="classy">classy</option>
+            <option value="classy-rounded">classy-rounded</option>
+          </select>
+        </label>
+
+        <label>Error correction
+          <select id="ecLevel">
+            <option value="L">L</option>
+            <option value="M" selected>M</option>
+            <option value="Q">Q</option>
+            <option value="H">H</option>
+          </select>
+        </label>
+
+        <label>Logo (optional)
+          <input id="logo" type="file" accept="image/*">
+        </label>
+
+        <label title="Make a more compatible QR (square modules, higher EC, margin)">
+          <input id="compat" type="checkbox"> Compatibility mode
+        </label>
+      </div>
+
+      <div class="actions">
+        <button id="apply">Apply</button>
+        <button id="download-png">Download PNG</button>
+        <button id="download-svg">Download SVG</button>
+        <button id="download-png-hr">Download High‑Res PNG</button>
+      </div>
+    </section>
+
+    <section class="preview">
+      <h2>Preview</h2>
+      <div id="qr-wrap"></div>
+    </section>
+  </main>
+
+  <!-- QR Code Styling library -->
+  <script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
