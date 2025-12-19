@@ -16,11 +16,22 @@ const qrCode = new QRCodeStyling({
 
 qrCode.append(wrap);
 
+function _validHex(v){
+  return typeof v === 'string' && /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(v);
+}
+
+function _getColor(pickId, codeId){
+  const pick = document.getElementById(pickId);
+  const code = document.getElementById(codeId);
+  if(code && _validHex(code.value)) return code.value;
+  return pick ? pick.value : (code ? code.value : '#000000');
+}
+
 function applyOptions(){
   const text = document.getElementById('text').value;
   const size = Number(document.getElementById('size').value);
-  const dotsColor = document.getElementById('dotsColor').value;
-  const bgColor = document.getElementById('bgColor').value;
+  const dotsColor = _getColor('dotsColor','dotsColorCode');
+  const bgColor = _getColor('bgColor','bgColorCode');
   const dotStyle = document.getElementById('dotStyle').value;
   const ec = document.getElementById('ecLevel').value;
   const compat = document.getElementById('compat').checked;
@@ -46,8 +57,24 @@ function applyOptions(){
 // Wire up controls
 document.getElementById('apply').addEventListener('click', applyOptions);
 document.getElementById('size').addEventListener('input', applyOptions);
-document.getElementById('dotsColor').addEventListener('input', applyOptions);
-document.getElementById('bgColor').addEventListener('input', applyOptions);
+// Color pickers and code inputs: keep in sync and apply
+const dotsPicker = document.getElementById('dotsColor');
+const dotsCode = document.getElementById('dotsColorCode');
+const bgPicker = document.getElementById('bgColor');
+const bgCode = document.getElementById('bgColorCode');
+
+if(dotsPicker){
+  dotsPicker.addEventListener('input', ()=>{ if(dotsCode) dotsCode.value = dotsPicker.value; applyOptions(); });
+}
+if(dotsCode){
+  dotsCode.addEventListener('input', ()=>{ if(_validHex(dotsCode.value) && dotsPicker) dotsPicker.value = dotsCode.value; applyOptions(); });
+}
+if(bgPicker){
+  bgPicker.addEventListener('input', ()=>{ if(bgCode) bgCode.value = bgPicker.value; applyOptions(); });
+}
+if(bgCode){
+  bgCode.addEventListener('input', ()=>{ if(_validHex(bgCode.value) && bgPicker) bgPicker.value = bgCode.value; applyOptions(); });
+}
 document.getElementById('dotStyle').addEventListener('change', applyOptions);
 document.getElementById('ecLevel').addEventListener('change', applyOptions);
 
@@ -56,24 +83,24 @@ document.getElementById('logo').addEventListener('change', (e)=>{
   const f = e.target.files && e.target.files[0];
   if(!f) return;
   const reader = new FileReader();
-  reader.onload = () => {
-    // Resize logo to be at most 20% of QR size to avoid covering too much
-    const img = new Image();
     img.onload = () => {
       const size = Number(document.getElementById('size').value) || defaultSize;
       const maxLogoDim = Math.round(size * 0.2);
+      // create a square canvas and center the resized logo inside it
       const canvas = document.createElement('canvas');
-      const ratio = Math.min(1, maxLogoDim / Math.max(img.width, img.height));
-      canvas.width = Math.round(img.width * ratio);
-      canvas.height = Math.round(img.height * ratio);
+      canvas.width = maxLogoDim;
+      canvas.height = maxLogoDim;
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0,0,canvas.width,canvas.height);
-      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+      const ratio = Math.min(1, maxLogoDim / img.width, maxLogoDim / img.height);
+      const dw = Math.round(img.width * ratio);
+      const dh = Math.round(img.height * ratio);
+      const dx = Math.round((canvas.width - dw) / 2);
+      const dy = Math.round((canvas.height - dh) / 2);
+      ctx.drawImage(img, dx, dy, dw, dh);
       const resized = canvas.toDataURL('image/png');
       qrCode.update({ image: resized, imageOptions: { crossOrigin: 'anonymous', margin: 5 } });
     };
-    img.src = reader.result;
-  };
   reader.readAsDataURL(f);
 });
 
